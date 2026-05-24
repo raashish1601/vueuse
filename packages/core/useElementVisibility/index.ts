@@ -38,6 +38,11 @@ export type UseElementVisibilityReturn<Controls extends boolean = false>
     : ShallowRef<boolean>
 
 export interface UseElementVisibilityReturnWithControls extends UseIntersectionObserverReturn {
+  /**
+   * Whether the internal observer is currently active.
+   */
+  isActive: UseIntersectionObserverReturn['isActive']
+
   isVisible: ShallowRef<boolean>
 }
 
