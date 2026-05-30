@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { nextTick, shallowRef } from 'vue'
 import { useElementVisibility } from './index'
 
 describe('useElementVisibility', () => {
@@ -35,8 +36,15 @@ describe('useElementVisibility', () => {
       vi.resetAllMocks()
       vi.mock('../useIntersectionObserver', () => ({
         useIntersectionObserver: vi.fn((_target) => {
+          const isActive = shallowRef(true)
           const stop = vi.fn()
-          return { stop }
+          stop.mockImplementation(() => {
+            isActive.value = false
+          })
+          return {
+            isActive,
+            stop,
+          }
         }),
       }))
     })
@@ -86,6 +94,32 @@ describe('useElementVisibility', () => {
       // It should become true if the callback gets an isIntersecting = true
       callMockCallbackWithIsIntersectingValue(true)
       expect(visibilityState.isVisible.value).toBe(true)
+    })
+
+    it('exposes isActive state in controls mode', () => {
+      const visibilityState = useElementVisibility(el, { controls: true })
+
+      expect(visibilityState.isActive.value).toBe(true)
+
+      visibilityState.stop()
+      expect(visibilityState.isActive.value).toBe(false)
+    })
+
+    it('stops observing after first visibility change when once is enabled', async () => {
+      const visibilityState = useElementVisibility(el, { controls: true, once: true })
+      const callback = vi.mocked(useIntersectionObserver).mock.lastCall?.[1]
+      const callMockCallbackWithIsIntersectingValue = (isIntersecting: boolean) => callback?.([{ isIntersecting, time: 1 } as IntersectionObserverEntry], {} as IntersectionObserver)
+
+      expect(visibilityState.isActive.value).toBe(true)
+
+      callMockCallbackWithIsIntersectingValue(false)
+      await nextTick()
+      expect(visibilityState.isActive.value).toBe(true)
+
+      callMockCallbackWithIsIntersectingValue(true)
+      await nextTick()
+      expect(visibilityState.isActive.value).toBe(false)
+      expect(visibilityState.stop).toHaveBeenCalledTimes(1)
     })
 
     it('uses the latest version of isIntersecting when multiple intersection entries are given', () => {

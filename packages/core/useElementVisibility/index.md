@@ -58,8 +58,9 @@ const targetIsVisible = useElementVisibility(target, {
 
 ```vue
 <template>
-  <UseElementVisibility v-slot="{ isVisible }">
+  <UseElementVisibility v-slot="{ isActive, isVisible }">
     Is Visible: {{ isVisible }}
+    <span v-if="!isActive"> (stopped)</span>
   </UseElementVisibility>
 </template>
 ```
@@ -80,9 +81,11 @@ function onElementVisibility(state) {
 
 const target2 = useTemplateRef('target2')
 const isVisible2 = shallowRef(false)
+const isActive2 = shallowRef(false)
 
 function onElementVisibilityWithControls(state) {
   isVisible2.value = state.isVisible.value
+  isActive2.value = state.isActive.value
   if (state.isVisible.value) {
     state.stop()
   }
@@ -104,7 +107,7 @@ function onElementVisibilityWithControls(state) {
   <!-- with controls -->
   <div ref="target2">
     <div v-element-visibility="[onElementVisibilityWithControls, { controls: true }]">
-      {{ isVisible2 ? 'inside' : 'outside' }}
+      {{ isVisible2 ? 'inside' : 'outside' }} (isActive: {{ isActive2 }})
     </div>
   </div>
 </template>
