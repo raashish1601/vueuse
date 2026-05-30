@@ -119,6 +119,7 @@ describe('useElementVisibility', () => {
       callMockCallbackWithIsIntersectingValue(true)
       await nextTick()
       expect(visibilityState.isActive.value).toBe(false)
+      expect(visibilityState.stop).toHaveBeenCalledTimes(1)
     })
 
     it('uses the latest version of isIntersecting when multiple intersection entries are given', () => {

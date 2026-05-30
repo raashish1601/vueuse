@@ -87,12 +87,6 @@ export function useElementVisibility(
         }
       }
       isVisible.value = isIntersecting
-
-      if (once) {
-        watchOnce(isVisible, () => {
-          observerController.stop()
-        })
-      }
     },
     {
       root: scrollTarget,
@@ -101,6 +95,12 @@ export function useElementVisibility(
       rootMargin,
     },
   )
+
+  if (once) {
+    watchOnce(isVisible, () => {
+      observerController.stop()
+    })
+  }
 
   return options.controls
     ? { ...observerController, isVisible }
